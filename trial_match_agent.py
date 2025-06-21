@@ -178,6 +178,7 @@ Reply strictly in this JSON format:
 
         try:
             response = client.models.generate_content(model=model, contents=contents, config=generate_content_config)
+            ipdb()
             raw = response.candidates[0].content.parts[0].text
             parsed = clean_json_from_gemini(raw)
             results.append(parsed)
