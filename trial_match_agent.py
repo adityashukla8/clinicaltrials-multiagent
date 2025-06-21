@@ -1,6 +1,13 @@
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 
+from appwrite.client import Client
+from appwrite.services.databases import Databases
+from appwrite.query import Query
+
+from google import genai
+from google.genai import types
+
 from typing import TypedDict, List, Annotated
 import os
 import json
@@ -8,12 +15,20 @@ import logging
 import requests
 import re
 
-from google import genai
-from google.genai import types
+from ipdb import set_trace as ipdb
 
 # Logging setup
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
+appwrite_client = Client()
+appwrite_client.set_endpoint(os.getenv("APPWRITE_API_ENDPOINT"))
+appwrite_client.set_project(os.getenv("APPWRITE_PROJECT_ID"))
+appwrite_client.set_key(os.getenv("APPWRITE_API_KEY"))
+
+databases = Databases(appwrite_client)
+database_id = os.getenv("APPWRITE_DATABASE_ID")
+collection_id = os.getenv("APPWRITE_COLLECTION_ID")
 
 class TrialMatch(TypedDict):
     trial_id: str
@@ -21,18 +36,51 @@ class TrialMatch(TypedDict):
     reason: str
 
 class AgentState(TypedDict):
+    patient_id: str
     patient_info: dict
     trials: List[dict]
     results: List[TrialMatch]
 
 def get_patient_info_tool(state: AgentState) -> AgentState:
-    state["patient_info"] = {
-        "age": 52,
-        "diagnosis": "Cancer of the Uterine Cervix",
-        "treatment_history": ["taxane-based chemotherapy"],
-        "country": "USA",
-        "gender": "Female"
-    }
+    patient_id = state.get("patient_id")
+    # ipdb()
+
+    if not patient_id:
+        raise ValueError("patient_id is required in the state")
+
+    # Filter Appwrite documents using the patient_id
+    try:
+        response = databases.list_documents(
+            database_id=database_id,
+            collection_id=collection_id,
+            queries=[
+                Query.equal("patient_id", patient_id)
+            ]
+        )
+
+        if not response['documents']:
+            raise ValueError(f"No patient found with ID: {patient_id}")
+
+        doc = response['documents'][0]
+
+        # Populate patient_info in the state
+        state["patient_info"] = {
+            "age": doc["age"],
+            "diagnosis": doc["condition"],
+            "treatment_history": [doc["chemotherapy"]],  # You can expand this logic
+            "country": doc["country"],
+            "gender": doc["gender"],
+            "ecog_score": doc["ecog_score"],
+            "biomarker": doc["biomarker"],
+            "metastasis": doc["metastasis"],
+            "radiotherapy": doc["radiotherapy"],
+            "histology": doc["histology"],
+            "condition_recurrence": doc["condition_recurrence"]
+        }
+
+    except Exception as e:
+        raise RuntimeError(f"Failed to fetch patient info: {e}")
+
     return state
 
 def fetch_clinical_trial_data(search_expr, max_studies):
@@ -143,7 +191,7 @@ Reply strictly in this JSON format:
     state["results"] = results
     return state
 
-def create_workflow(agent_state):
+def create_workflow():
     workflow = StateGraph(AgentState)
     workflow.add_node("get_patient_info", get_patient_info_tool)
     workflow.add_node("fetch_trials", return_trial_info_tool)
@@ -158,14 +206,20 @@ def create_workflow(agent_state):
 
     return app
 
-def main():
-    app = create_workflow(AgentState())
+def main(patient_id):
+    app = create_workflow()
+    initial_state = {
+    "patient_id": "P005"
+    }
 
-    final_state = app.invoke({})
+    final_state = app.invoke(initial_state)
 
     return final_state['results']
 
 if __name__ == "__main__":
-    results = main()
+    patient_id = 'P004'
+    results = main(patient_id)
+
     print(json.dumps(results, indent=2))
+    
     logger.info("Trial matching completed successfully.")
