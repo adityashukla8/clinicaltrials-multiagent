@@ -33,7 +33,7 @@ def get_patient_info_tool(state):
     state["patient_info"] = {
         "age": doc["age"],
         "diagnosis": doc["condition"],
-        "treatment_history": [doc["chemotherapy"]],
+        "treatment_history": {'chemothrepy': doc.get("chemotherapy"), 'radiotherapy': doc.get("radiotherapy")},
         "country": doc["country"],
         "gender": doc["gender"],
         "ecog_score": doc["ecog_score"],
