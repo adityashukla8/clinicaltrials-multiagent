@@ -156,7 +156,8 @@ Reply strictly in this JSON format:
 {{
   "trial_id": "{trial['trial_id']}",
   "match_criteria": "match" or "not match",
-  "reason": "brief explanation"
+  "reason": "brief explanation",
+  "match_requirements": "if no match, specify what changes in patient profile could lead to a match"
 }}
         """)
 
@@ -210,7 +211,7 @@ def create_workflow():
 def main(patient_id):
     app = create_workflow()
     initial_state = {
-    "patient_id": "P005"
+    "patient_id": patient_id
     }
 
     final_state = app.invoke(initial_state)
