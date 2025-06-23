@@ -2,6 +2,8 @@ from appwrite.client import Client
 from appwrite.services.databases import Databases
 import os
 
+from ipdb import set_trace as ipdb
+
 def init_appwrite():
     client = Client()
     client.set_endpoint(os.getenv("APPWRITE_API_ENDPOINT"))
@@ -11,3 +13,4 @@ def init_appwrite():
 
 DATABASE_ID = os.getenv("APPWRITE_DATABASE_ID")
 COLLECTION_ID = os.getenv("APPWRITE_COLLECTION_ID")
+TRIAL_INFO_COLLECTION_ID = os.getenv("APPWRITE_TRIALS_INFO_COLLECTION_ID")
