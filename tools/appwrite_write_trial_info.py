@@ -1,14 +1,15 @@
 from appwrite.query import Query
-from appwrite_client import init_appwrite, DATABASE_ID, TRIAL_INFO_COLLECTION_ID
+from appwrite_client import init_appwrite, DATABASE_ID, TRIAL_INFO_COLLECTION_ID, TRIAL_SUMMARY_COLLECTION_ID
 import logging
+from datetime import datetime
+
 from ipdb import set_trace as ipdb
 
 logger = logging.getLogger(__name__)
 
-def insert_or_update_trial_to_appwrite(trial: dict):
-    db = init_appwrite()
+db = init_appwrite()
 
-    # Step 1: Search for existing trial with same trial_id
+def insert_or_update_trial_to_appwrite(trial: dict):
     existing = db.list_documents(
         database_id=DATABASE_ID,
         collection_id=TRIAL_INFO_COLLECTION_ID,
@@ -32,3 +33,45 @@ def insert_or_update_trial_to_appwrite(trial: dict):
             document_id=trial["trial_id"],
             data=trial
         )
+
+def flatten_summary_card(summary_card):
+    flat = {
+        "trial_id": summary_card["nct_id"],
+        "created_at": datetime.utcnow().isoformat(),
+        "citations": [],
+    }
+
+    for key, section in summary_card["sections"].items():
+        flat[key] = section.get("summary", "")
+        flat["citations"].extend(section.get("citations", []))
+
+    return flat
+
+def insert_trial_summary_to_appwrite(summary_card):
+    flat_data = flatten_summary_card(summary_card)
+    trial_id = flat_data["trial_id"]
+
+    existing = db.list_documents(
+        database_id=DATABASE_ID,
+        collection_id=TRIAL_SUMMARY_COLLECTION_ID,
+        queries=[Query.equal("trial_id", trial_id)]
+    )
+
+    if existing["total"] > 0:
+        logger.info(f"Summary for {trial_id} exists, updating...")
+        doc_id = existing["documents"][0]["$id"]
+        return db.update_document(
+            database_id=DATABASE_ID,
+            collection_id=TRIAL_SUMMARY_COLLECTION_ID,
+            document_id=doc_id,
+            data=flat_data
+        )
+    else:
+        logger.info(f"Summary for {trial_id} not found, creating...")
+        return db.create_document(
+            database_id=DATABASE_ID,
+            collection_id=TRIAL_SUMMARY_COLLECTION_ID,
+            document_id=trial_id,
+            data=flat_data
+        )
+    

@@ -2,6 +2,9 @@ import os
 import logging
 import concurrent.futures
 from tools.tavily_search import tavily_search
+from tools.appwrite_write_trial_info import insert_trial_summary_to_appwrite
+
+from ipdb import set_trace as ipdb
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -43,6 +46,13 @@ def get_trial_summary_card(nct_id: str) -> dict:
             section, result = future.result()
             summary_card["sections"][section] = result
 
-        logger.info(f"Summary card for {nct_id} created")
+        insert_trial_summary_to_appwrite(summary_card)
+        logger.info(f"Summary card for {nct_id} inserted into Appwrite")
+        # ipdb()
 
     return summary_card
+
+if __name__ == "__main__":
+    nct_id = "NCT05863195"
+    summary_card = get_trial_summary_card(nct_id)
+    print(summary_card)

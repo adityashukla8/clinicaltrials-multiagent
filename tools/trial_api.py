@@ -40,13 +40,13 @@ def fetch_clinical_trial_data(search_expr, max_studies):
                         "eligibility": eligibility,
                         "arms": str(arms),
                         "interventions": str(interventions),
-                        "summary_card": str({}),
+                        # "summary_card": str({}),
                         "optimized_protocol": "",
                         "source_url": f"https://clinicaltrials.gov/ct2/show/{nct_id}",
                         "created_at": datetime.utcnow().isoformat()
                     }
 
-                    ipdb()
+                    # ipdb()
                     insert_or_update_trial_to_appwrite(trial_data)
                     logger.info(f"Trial written to DB: {nct_id}")
 
