@@ -1,5 +1,5 @@
 from appwrite.query import Query
-from appwrite_client import init_appwrite, DATABASE_ID, TRIAL_INFO_COLLECTION_ID, TRIAL_SUMMARY_COLLECTION_ID
+from appwrite_client import init_appwrite, DATABASE_ID, TRIAL_INFO_COLLECTION_ID, TRIAL_SUMMARY_COLLECTION_ID, MATCH_COLLECTION_ID
 import logging
 from datetime import datetime
 
@@ -75,3 +75,36 @@ def insert_trial_summary_to_appwrite(summary_card):
             data=flat_data
         )
     
+def insert_match_to_appwrite(match: dict, patient_id):
+    match_id = f"{patient_id}_{match['trial_id']}"
+    
+    data = {
+        "match_id": match_id,
+        "patient_id": patient_id,
+        "trial_id": match["trial_id"],
+        "match_criteria": match["match_criteria"],
+        "reason": match.get("reason", ""),
+        "match_requirements": match.get("match_requirements", "")
+    }
+
+    existing = db.list_documents(
+        database_id=DATABASE_ID,
+        collection_id=MATCH_COLLECTION_ID,
+        queries=[Query.equal("match_id", match_id)]
+    )
+
+    if existing["total"] > 0:
+        doc_id = existing["documents"][0]["$id"]
+        return db.update_document(
+            database_id=DATABASE_ID,
+            collection_id=MATCH_COLLECTION_ID,
+            document_id=doc_id,
+            data=data
+        )
+    else:
+        return db.create_document(
+            database_id=DATABASE_ID,
+            collection_id=MATCH_COLLECTION_ID,
+            document_id=match_id,
+            data=data
+        )
