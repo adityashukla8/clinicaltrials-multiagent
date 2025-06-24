@@ -179,7 +179,7 @@ Reply strictly in this JSON format:
 
         try:
             response = client.models.generate_content(model=model, contents=contents, config=generate_content_config)
-            ipdb()
+            # ipdb()
             raw = response.candidates[0].content.parts[0].text
             parsed = clean_json_from_gemini(raw)
             results.append(parsed)
@@ -218,10 +218,10 @@ def main(patient_id):
 
     return final_state['results']
 
-if __name__ == "__main__":
-    patient_id = 'P004'
-    results = main(patient_id)
+# if __name__ == "__main__":
+#     patient_id = 'P004'
+#     results = main(patient_id)
 
-    print(json.dumps(results, indent=2))
+#     print(json.dumps(results, indent=2))
     
-    logger.info("Trial matching completed successfully.")
+#     logger.info("Trial matching completed successfully.")

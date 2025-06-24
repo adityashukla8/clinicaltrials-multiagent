@@ -52,7 +52,7 @@ def get_trial_summary_card(nct_id: str) -> dict:
 
     return summary_card
 
-if __name__ == "__main__":
-    nct_id = "NCT05863195"
-    summary_card = get_trial_summary_card(nct_id)
-    print(summary_card)
+# if __name__ == "__main__":
+#     nct_id = "NCT05863195"
+#     summary_card = get_trial_summary_card(nct_id)
+#     print(summary_card)

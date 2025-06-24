@@ -74,7 +74,7 @@ def main(synthetic_data_count, write_to_appwrite):
 
     # print(json.dumps(patient_data, indent=2))
 
-if __name__ == "__main__":
-    write_to_appwrite=True
-    synthetic_data_count=200
-    main(synthetic_data_count, write_to_appwrite=write_to_appwrite)
+# if __name__ == "__main__":
+#     write_to_appwrite=True
+#     synthetic_data_count=200
+#     main(synthetic_data_count, write_to_appwrite=write_to_appwrite)

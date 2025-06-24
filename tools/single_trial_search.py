@@ -39,14 +39,14 @@ def fetch_trial_details_by_nct_id(nct_id):
         logger.error(f"Exception occurred while fetching trial {nct_id}: {e}")
         return None
 
-if __name__ == "__main__":
-    nct_id = "NCT06750094"  # Example NCT ID
-    trial_details = fetch_trial_details_by_nct_id(nct_id)
-    if trial_details:
-        print(f"Details for trial {nct_id}:")
-        # print with indent
-        print(json.dumps(trial_details, indent=2))
+# if __name__ == "__main__":
+#     nct_id = "NCT06750094"  # Example NCT ID
+#     trial_details = fetch_trial_details_by_nct_id(nct_id)
+#     if trial_details:
+#         print(f"Details for trial {nct_id}:")
+#         # print with indent
+#         print(json.dumps(trial_details, indent=2))
     
-        ipdb()
-    else:
-        print(f"No details found for trial {nct_id}.")
+#         ipdb()
+#     else:
+#         print(f"No details found for trial {nct_id}.")

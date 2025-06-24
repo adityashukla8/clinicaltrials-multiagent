@@ -23,9 +23,9 @@ def match_trials(patient_id):
 
     return final_state['results']
 
-if __name__ == "__main__":
-    patient_id = 'P123'
-    results = match_trials(patient_id)
-    # ipdb()
-    print(json.dumps(results, indent=2))
-    logger.info("Trial matching completed successfully.")
+# if __name__ == "__main__":
+#     patient_id = 'P123'
+#     results = match_trials(patient_id)
+#     # ipdb()
+#     print(json.dumps(results, indent=2))
+#     logger.info("Trial matching completed successfully.")

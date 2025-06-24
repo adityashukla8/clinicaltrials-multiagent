@@ -61,5 +61,5 @@ def fetch_patient_by_id(patient_id: str):
         logging.error(f"Error fetching patient: {e}")
         return None
 
-if __name__ == "__main__":
-    patients = fetch_all_patients()
+# if __name__ == "__main__":
+#     patients = fetch_all_patients()
