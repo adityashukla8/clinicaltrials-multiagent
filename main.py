@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi import HTTPException
 
 from tools.appwrite_get_all_patients import fetch_all_patients, fetch_patient_by_id
-from clinical_trials_match import match_trials
+from tools.clinical_trials_match import match_trials
 
 from pydantic import BaseModel
 
