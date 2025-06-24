@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+appwrite
+python-dotenv
+httpx
+pydantic
+google-generativeai
+ipdb
+pandas
+requests
+tavily-python
+langgraph
+langchain

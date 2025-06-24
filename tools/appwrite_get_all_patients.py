@@ -46,5 +46,20 @@ def fetch_all_patients():
     # ipdb()
     return patients
 
+def fetch_patient_by_id(patient_id: str):
+    db = init_appwrite()
+    try:
+        response = db.list_documents(
+            database_id=DATABASE_ID,
+            collection_id=COLLECTION_ID,
+            queries=[Query.equal("patient_id", patient_id)]
+        )
+        if not response['documents']:
+            return None
+        return response['documents'][0]
+    except Exception as e:
+        logging.error(f"Error fetching patient: {e}")
+        return None
+
 if __name__ == "__main__":
     patients = fetch_all_patients()
