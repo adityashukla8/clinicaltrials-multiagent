@@ -1,5 +1,5 @@
 from appwrite.query import Query
-from appwrite_client import init_appwrite, DATABASE_ID, COLLECTION_ID
+from tools.appwrite_client import init_appwrite, DATABASE_ID, COLLECTION_ID
 import logging
 from ipdb import set_trace as ipdb
 
