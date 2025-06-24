@@ -9,7 +9,7 @@ from ipdb import set_trace as ipdb
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-def main(patient_id):
+def match_trials(patient_id):
     app = create_workflow()
     initial_state = {
         "patient_id": patient_id
@@ -25,7 +25,7 @@ def main(patient_id):
 
 if __name__ == "__main__":
     patient_id = 'P123'
-    results = main(patient_id)
+    results = match_trials(patient_id)
     # ipdb()
     print(json.dumps(results, indent=2))
     logger.info("Trial matching completed successfully.")

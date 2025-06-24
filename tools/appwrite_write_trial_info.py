@@ -1,5 +1,5 @@
 from appwrite.query import Query
-from appwrite_client import init_appwrite, DATABASE_ID, TRIAL_INFO_COLLECTION_ID, TRIAL_SUMMARY_COLLECTION_ID, MATCH_COLLECTION_ID
+from tools.appwrite_client import init_appwrite, DATABASE_ID, TRIAL_INFO_COLLECTION_ID, TRIAL_SUMMARY_COLLECTION_ID, MATCH_COLLECTION_ID
 import logging
 from datetime import datetime
 
