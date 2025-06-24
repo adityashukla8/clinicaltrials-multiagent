@@ -12,7 +12,7 @@ def root():
 @app.get("/patients")
 def get_patients():
     patients = fetch_all_patients()
-    return {"patients": patients}
+    return patients
 
 @app.get("/patients/{patient_id}")
 def get_patient_by_id(patient_id: str):
