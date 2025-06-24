@@ -2,6 +2,7 @@ from appwrite.query import Query
 from tools.appwrite_client import init_appwrite, DATABASE_ID, TRIAL_INFO_COLLECTION_ID, TRIAL_SUMMARY_COLLECTION_ID, MATCH_COLLECTION_ID
 import logging
 from datetime import datetime
+from collections import defaultdict
 
 from ipdb import set_trace as ipdb
 
@@ -169,4 +170,70 @@ def fetch_trial_info(patient_id: str):
         trials_info.append(enriched_info)
 
     return trials_info
-# ipdb()
+
+
+def fetch_all_trials():
+    trial_info_docs = db.list_documents(
+        database_id=DATABASE_ID,
+        collection_id=TRIAL_INFO_COLLECTION_ID,
+        queries=[Query.limit(300)]  # Adjust or paginate
+    )["documents"]
+
+    # Step 2: Load all trial_summary
+    trial_summary_docs = db.list_documents(
+        database_id=DATABASE_ID,
+        collection_id=TRIAL_SUMMARY_COLLECTION_ID,
+        queries=[Query.limit(200)]
+    )["documents"]
+
+    # Step 3: Count matches per trial from match_info
+    match_docs = db.list_documents(
+        database_id=DATABASE_ID,
+        collection_id=MATCH_COLLECTION_ID,
+        queries=[Query.limit(500)]
+    )["documents"]
+
+    match_counts = defaultdict(int)
+    for doc in match_docs:
+        trial_id = doc.get("trial_id")
+        if trial_id:
+            match_counts[trial_id] += 1
+
+    # Step 4: Build lookup map for summary
+    trial_summaries = {doc.get("trial_id"): doc for doc in trial_summary_docs}
+
+    # Step 5: Combine everything
+    enriched_trials = []
+    for trial in trial_info_docs:
+        trial_id = trial.get("trial_id")
+
+        summary = trial_summaries.get(trial_id, {})
+
+        enriched_trials.append({
+            "trial_id": trial_id,
+            "title": trial.get("title"),
+            "source_url": trial.get("source_url"),
+            "eligibility": trial.get("eligibility"),
+            "official_title": summary.get("official_title"),
+            "known_side_effects": summary.get("known_side_effects"),
+            "dsmc_presence": summary.get("dsmc_presence"),
+            "enrollment_info": summary.get("enrollment_info"),
+            "objective_summary": summary.get("objective_summary"),
+            "external_notes": summary.get("external_notes"),
+            "sponsor_info": summary.get("sponsor_info"),
+            "patient_experiences": summary.get("patient_experiences"),
+            "statistical_plan": summary.get("statistical_plan"),
+            "intervention_arms": summary.get("intervention_arms"),
+            "sample_size": summary.get("sample_size"),
+            "pre_req_for_participation": summary.get("pre_req_for_participation"),
+            "sponsor_contact": summary.get("sponsor_contact"),
+            "location_and_site_details": summary.get("location_and_site_details"),
+            "monitoring_frequency": summary.get("monitoring_frequency"),
+            "safety_documents": summary.get("safety_documents"),
+            "sites": summary.get("sites"),
+            "patient_faq_summary": summary.get("patient_faq_summary"),
+            "citations": summary.get("citations"),
+            "matched_patients_count": match_counts.get(trial_id, 0)
+        })
+
+    return enriched_trials

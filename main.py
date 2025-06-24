@@ -3,7 +3,7 @@ from fastapi import HTTPException, status
 
 from tools.appwrite_get_all_patients import fetch_all_patients, fetch_patient_by_id
 from tools.clinical_trials_match import match_trials
-from tools.appwrite_write_trial_info import fetch_trial_info
+from tools.appwrite_write_trial_info import fetch_trial_info, fetch_all_trials
 
 from pydantic import BaseModel
 from typing import List, Optional
@@ -32,6 +32,36 @@ class TrialInfo(BaseModel):
 class TrialInfoResponse(BaseModel):
     success: bool
     trials: List[TrialInfo]
+
+class TrialData(BaseModel):
+    trial_id: str
+    title: Optional[str]
+    source_url: Optional[str]
+    eligibility: Optional[str]
+    official_title: Optional[str]
+    known_side_effects: Optional[str]
+    dsmc_presence: Optional[str]
+    enrollment_info: Optional[str]
+    objective_summary: Optional[str]
+    external_notes: Optional[str]
+    sponsor_info: Optional[str]
+    patient_experiences: Optional[str]
+    statistical_plan: Optional[str]
+    intervention_arms: Optional[str]
+    sample_size: Optional[str]
+    pre_req_for_participation: Optional[str]
+    sponsor_contact: Optional[str]
+    location_and_site_details: Optional[str]
+    monitoring_frequency: Optional[str]
+    safety_documents: Optional[str]
+    sites: Optional[str]
+    patient_faq_summary: Optional[str]
+    citations: Optional[str]
+    matched_patients_count: int
+
+class TrialListResponse(BaseModel):
+    success: bool
+    trials: List[TrialData]
 
 @app.get("/")
 def root():
@@ -68,3 +98,14 @@ def run_trial_match(payload: MatchRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
+
+@app.get("/all_trials", response_model=TrialListResponse)
+def get_all_trials():
+    try:
+        trials = fetch_all_trials()
+        return {
+            "success": True,
+            "trials": trials
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
