@@ -108,3 +108,65 @@ def insert_match_to_appwrite(match: dict, patient_id):
             document_id=match_id,
             data=data
         )
+
+#def fetch_trial_info(): for given patient_id, get 'trial_id', 'match_criteria', 'reason', 'match_requirements' from match_info collection and fetch trial info from train_info collection
+def fetch_trial_info(patient_id: str):
+    db = init_appwrite()
+
+    # Step 1: Get matches for this patient
+    match_docs = db.list_documents(
+        database_id=DATABASE_ID,
+        collection_id=MATCH_COLLECTION_ID,
+        queries=[
+            Query.equal("patient_id", patient_id),
+            Query.limit(100)  # You can paginate if needed
+        ]
+    )
+
+    if not match_docs.get("documents"):
+        return []
+
+    trial_ids = []
+    match_map = {}  # { trial_id: { match_criteria, reason, match_requirements } }
+
+    for doc in match_docs["documents"]:
+        trial_id = doc.get("trial_id")
+        if not trial_id:
+            continue
+        trial_ids.append(trial_id)
+        match_map[trial_id] = {
+            "trial_id": trial_id,
+            "match_criteria": doc.get("match_criteria"),
+            "reason": doc.get("reason"),
+            "match_requirements": doc.get("match_requirements"),
+        }
+
+    # Step 2: Fetch trial details in bulk
+    trial_docs = db.list_documents(
+        database_id=DATABASE_ID,
+        collection_id=TRIAL_INFO_COLLECTION_ID,
+        queries=[
+            Query.equal("trial_id", trial_ids),
+            Query.limit(100)
+        ]
+    )
+
+    trials_info = []
+
+    for trial in trial_docs["documents"]:
+        trial_id = trial.get("trial_id")
+        base_info = match_map.get(trial_id, {})
+        enriched_info = {
+            **base_info,
+            "title": trial.get("title"),
+            "phase": trial.get("phase"),
+            "condition": trial.get("condition"),
+            "status": trial.get("status"),
+            "location": trial.get("location"),
+            "eligibility": trial.get("eligibility"),
+            "source_url": trial.get("source_url"),
+        }
+        trials_info.append(enriched_info)
+
+    return trials_info
+# ipdb()
