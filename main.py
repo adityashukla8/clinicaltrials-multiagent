@@ -5,6 +5,10 @@ from tools.appwrite_get_all_patients import fetch_all_patients, fetch_patient_by
 
 app = FastAPI()
 
+@app.get("/")
+def root():
+    return {"status": "running"}
+
 @app.get("/patients")
 def get_patients():
     patients = fetch_all_patients()
