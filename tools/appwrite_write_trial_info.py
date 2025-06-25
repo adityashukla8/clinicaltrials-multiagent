@@ -237,3 +237,4 @@ def fetch_all_trials():
         })
 
     return enriched_trials
+# ipdb()

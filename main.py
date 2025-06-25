@@ -56,7 +56,7 @@ class TrialData(BaseModel):
     safety_documents: Optional[str]
     sites: Optional[str]
     patient_faq_summary: Optional[str]
-    citations: Optional[str]
+    citations: Optional[List[str]] = []
     matched_patients_count: int
 
 class TrialListResponse(BaseModel):
