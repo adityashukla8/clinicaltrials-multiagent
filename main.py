@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from tools.appwrite_get_all_patients import fetch_all_patients, fetch_patient_by_id
 from tools.clinical_trials_match import match_trials
 from tools.appwrite_write_trial_info import fetch_trial_info, fetch_all_trials
-from tools.appwrite_metrics import metrics
+from tools.appwrite_metrics import get_appwrite_metrics
 
 from pydantic import BaseModel
 from typing import List, Optional
@@ -116,4 +116,8 @@ def get_all_trials():
 
 @app.get("/metrics")
 def get_metrics():
+    try:
+        metrics = get_appwrite_metrics()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
     return JSONResponse(content=metrics)
