@@ -133,7 +133,7 @@ def read_optimization_by_trial_id(trial_id: str):
         raise HTTPException(status_code=404, detail="Trial not found")
     return result
 
-@app.get("/search-protocols/all")
+@app.get("/search-protocols")
 def read_all_optimizations():
     result = get_all_protocol_optimizations()
     return JSONResponse(content=result)
