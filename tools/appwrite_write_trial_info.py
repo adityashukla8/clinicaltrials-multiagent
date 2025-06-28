@@ -1,8 +1,10 @@
 from appwrite.query import Query
-from tools.appwrite_client import init_appwrite, DATABASE_ID, TRIAL_INFO_COLLECTION_ID, TRIAL_SUMMARY_COLLECTION_ID, MATCH_COLLECTION_ID
+from tools.appwrite_client import init_appwrite, DATABASE_ID, TRIAL_INFO_COLLECTION_ID, TRIAL_SUMMARY_COLLECTION_ID, MATCH_COLLECTION_ID, PROTOCOL_OPTIMIZATION_COLLECTION_ID
 import logging
 from datetime import datetime
 from collections import defaultdict
+
+import json 
 
 from ipdb import set_trace as ipdb
 
@@ -237,4 +239,96 @@ def fetch_all_trials():
         })
 
     return enriched_trials
+
+def write_protocol_optimization(trial_id: str, output: dict):
+    document = {
+        "trial_id": trial_id,
+        "summary": str(output.get("summary", "")),
+        "age_optimization_result": str(json.dumps(output.get("age_optimization_result", {}))),
+        "biomarker_optimization_result": str(json.dumps(output.get("biomarker_optimization_result", {}))),
+        "created_at": __import__("datetime").datetime.utcnow().isoformat()
+    }
+
+    try:
+        result = db.create_document(
+            database_id=DATABASE_ID,
+            collection_id=PROTOCOL_OPTIMIZATION_COLLECTION_ID,
+            document_id="unique()",
+            data=document
+        )
+
+        print(f"✅ Optimization result written for trial {trial_id}")
+        return result
+
+    except Exception as e:
+        print(f"❌ Failed to write protocol optimization: {e}")
+        return None
+
+def get_protocol_optimization_by_trial_id(trial_id: str):
+    try:
+        # Search document by trial_id
+        response = db.list_documents(
+            database_id=DATABASE_ID,
+            collection_id=PROTOCOL_OPTIMIZATION_COLLECTION_ID,
+            queries=[Query.equal("trial_id", trial_id)]
+        )
+
+        if len(response["documents"]) == 0:
+            return {"success": False, "error": f"No optimization data found for trial_id: {trial_id}"}
+
+        doc = response["documents"][0]
+
+        # Parse back the JSON fields
+        output = {
+            "summary": doc["summary"],
+            "age_optimization_result": json.loads(doc["age_optimization_result"]),
+            "biomarker_optimization_result": json.loads(doc["biomarker_optimization_result"]),
+            "created_at": doc.get("created_at")
+        }
+
+        return {"success": True, "data": output}
+
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+def get_all_protocol_optimizations():
+    try:
+        documents = []
+        last_id = None
+
+        while True:
+            queries = []
+            if last_id:
+                from appwrite.query import Query
+                queries.append(Query.cursor_after(last_id))
+
+            res = db.list_documents(
+                database_id=DATABASE_ID,
+                collection_id=PROTOCOL_OPTIMIZATION_COLLECTION_ID,
+                queries=queries
+            )
+
+            docs = res["documents"]
+            if not docs:
+                break
+
+            for doc in docs:
+                try:
+                    documents.append({
+                        "trial_id": doc["trial_id"],
+                        "summary": doc["summary"],
+                        "age_optimization_result": json.loads(doc["age_optimization_result"]),
+                        "biomarker_optimization_result": json.loads(doc["biomarker_optimization_result"]),
+                        "created_at": doc.get("created_at")
+                    })
+                except Exception as e:
+                    print(f"Error parsing doc {doc['$id']}: {e}")
+
+            last_id = docs[-1]["$id"]
+
+        return {"success": True, "data": documents}
+
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
 # ipdb()

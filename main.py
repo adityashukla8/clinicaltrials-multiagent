@@ -4,11 +4,12 @@ from fastapi.responses import JSONResponse
 
 from tools.appwrite_get_all_patients import fetch_all_patients, fetch_patient_by_id
 from tools.clinical_trials_match import match_trials
-from tools.appwrite_write_trial_info import fetch_trial_info, fetch_all_trials
+from tools.run_protocol_optimization_workflow import run_protocol_optimization
+from tools.appwrite_write_trial_info import fetch_trial_info, fetch_all_trials, get_protocol_optimization_by_trial_id, get_all_protocol_optimizations
 from tools.appwrite_metrics import get_appwrite_metrics
 
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Any, Dict
 
 from ipdb import set_trace as ipdb
 
@@ -67,6 +68,9 @@ class TrialListResponse(BaseModel):
     success: bool
     trials: List[TrialData]
 
+class TrialIDRequest(BaseModel):
+    trial_id: str
+
 @app.get("/")
 def root():
     return {"status": "running"}
@@ -121,3 +125,36 @@ def get_metrics():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     return JSONResponse(content=metrics)
+
+@app.post("/search-protocols")
+def read_optimization_by_trial_id(payload: TrialIDRequest):
+    result = get_protocol_optimization_by_trial_id(payload.trial_id)
+    return JSONResponse(content=result)
+
+
+@app.get("/search-protocols/all")
+def read_all_optimizations():
+    result = get_all_protocol_optimizations()
+    return JSONResponse(content=result)
+
+class OptimizationRequest(BaseModel):
+    trial_id: str
+
+class OptimizationResponse(BaseModel):
+    success: bool
+    data: Dict[str, Any] = {}
+    error: str = None
+
+@app.post("/optimize-protocol", response_model=OptimizationResponse)
+def optimize_protocol(request: OptimizationRequest):
+    try:
+        result = run_protocol_optimization(request.trial_id)
+        return {
+            "success": True,
+            "data": result,
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+        }

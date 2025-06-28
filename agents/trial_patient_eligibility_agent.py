@@ -94,11 +94,11 @@ Reply strictly in this JSON format:
 # if __name__ == "__main__":
     
 #     patients_list = fetch_all_patients()
+#     ipdb()
 
 #     nct_id = "NCT06614192"
 #     trial = fetch_trial_details_by_nct_id(nct_id)
 
 #     if trial:
 #         results = evaluate_trial_against_patients(trial, patients_list)
-#         ipdb()
         
