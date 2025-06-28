@@ -126,11 +126,12 @@ def get_metrics():
         raise HTTPException(status_code=500, detail=str(e))
     return JSONResponse(content=metrics)
 
-@app.post("/search-protocols")
-def read_optimization_by_trial_id(payload: TrialIDRequest):
-    result = get_protocol_optimization_by_trial_id(payload.trial_id)
-    return JSONResponse(content=result)
-
+@app.get("/search-protocols/{trial_id}")
+def read_optimization_by_trial_id(trial_id: str):
+    result = get_protocol_optimization_by_trial_id(trial_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Trial not found")
+    return result
 
 @app.get("/search-protocols/all")
 def read_all_optimizations():
