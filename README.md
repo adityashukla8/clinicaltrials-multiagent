@@ -1,3 +1,5 @@
+***Frontend Repo: https://github.com/adityashukla8/project-qhm7lvsowfqcd1xv1a2up***
+
 **Clinical Trials** are research studies conducted on people to evaluate new medical interventions, like drugs, therapies, or devices, for safety and effectiveness.
 
 But traditional trial matching and protocol design processes often struggle with challenges:
@@ -83,8 +85,8 @@ Suggest data-driven optimizations to improve trial eligibility and recruitment r
 - **AppWrite**: Fetch all patient records
 - **ClinicalTrials.gov**: Fetch trial metadata (Eligibility Criteria, Age Limits, Biomarkers, etc.)
 
-<!-- ### Architecture -->
-<!-- ![Architecture]() -->
+### Architecture
+![Architecture](https://github.com/adityashukla8/clinicaltrials-multiagent/raw/master/assets/Clinical%20Trial%20Architecture.png)
 
 ## What's next for Criteria-AI
 
